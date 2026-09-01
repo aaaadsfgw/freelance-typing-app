@@ -42,5 +42,5 @@ UI: C ベース + A の返信感（`ui-proposals/game-c.html`）
 
 - [x] `just check` が成功する（lint / typecheck / test / build）
 - [x] ローカルで一通りプレイできる（API・画面 200、問題取得・結果保存を確認）
-- [ ] Cloudflare Workers にデプロイ済み
-- [ ] 公開 URL から主要機能にアクセスできる
+- [x] Cloudflare Workers にデプロイ済み
+- [x] 公開 URL から主要機能にアクセスできる
