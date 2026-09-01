@@ -414,18 +414,38 @@ th {
   color: #9aa3b5;
 }
 
-.c-romaji-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  gap: 12px;
+.c-romaji-full {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 20px;
+  line-height: 1.7;
+  font-weight: 600;
+  word-break: break-all;
 }
 
-.c-romaji {
-  font-family: var(--mono);
-  color: var(--indigo);
-  font-size: 14px;
+.guide-typed {
+  color: var(--ink-soft);
+}
+
+.guide-current {
+  display: inline-block;
+  background: #fde68a;
+  color: var(--ink);
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px #fbbf24;
+  font-weight: 800;
+}
+
+.guide-pending {
+  color: #9aa3b5;
+}
+
+.c-romaji-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 12px;
+  gap: 12px;
 }
 
 .c-pop {

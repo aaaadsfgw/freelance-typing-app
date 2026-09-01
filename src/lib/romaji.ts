@@ -138,17 +138,28 @@ const PUNCT: Record<string, string[]> = {
   "：": [":"],
   "（": ["("],
   "）": [")"],
-  "　": [" "],
 };
 
 export type KeyOutcome = "hit" | "miss" | "ignore" | "complete";
 
 export type DisplayMark = "typed" | "current" | "pending";
 
+export type TypeUnit = {
+  spellings: string[];
+  preferred: string;
+  skip: boolean;
+  displayFrom: number;
+  displayTo: number;
+};
+
+export type GuideChar = {
+  ch: string;
+  mark: DisplayMark;
+};
+
 export type TypingEngine = {
   display: string;
-  morae: string[][];
-  charToMora: number[];
+  units: TypeUnit[];
   moraIndex: number;
   buffer: string;
   hits: number;
@@ -238,9 +249,44 @@ function toHiragana(input: string): string {
     .join("");
 }
 
+function isSpace(ch: string): boolean {
+  return ch === " " || ch === "\u3000";
+}
+
+function isAsciiLetter(ch: string): boolean {
+  return /[A-Za-z]/.test(ch);
+}
+
+function isSmallYoon(ch: string): boolean {
+  return "ぁぃぅぇぉゃゅょァィゥェォャュョ".includes(ch);
+}
+
+function isKanaChar(ch: string): boolean {
+  const code = ch.charCodeAt(0);
+  return (
+    (code >= 0x3041 && code <= 0x3096) ||
+    (code >= 0x30a1 && code <= 0x30f6) ||
+    ch === "ー" ||
+    ch === "・"
+  );
+}
+
+function isAsciiGlyph(ch: string): boolean {
+  return ch.charCodeAt(0) < 128 && !isSpace(ch);
+}
+
+function isKanjiChar(ch: string): boolean {
+  return !isSpace(ch) && !isAsciiGlyph(ch) && !isKanaChar(ch) && !PUNCT[ch];
+}
+
 function spellingsFor(token: string): string[] {
   if (KANA[token]) return KANA[token];
   if (PUNCT[token]) return PUNCT[token];
+  if (token.length === 1 && isAsciiLetter(token)) {
+    const lower = token.toLowerCase();
+    const upper = token.toUpperCase();
+    return lower === upper ? [token] : [token, token === lower ? upper : lower];
+  }
   if (token.length === 1) return [token];
   return [token];
 }
@@ -255,23 +301,22 @@ function tokenizeKana(kana: string, nextAfter = ""): string[][] {
     if (src[i] === "っ" && i + 1 < src.length) {
       const rest = tokenizeKana(src.slice(i + 1), look);
       const next = rest[0] ?? ["a"];
-      const merged = [
+      const consonants = [
         ...new Set(
-          next.flatMap((s) => {
-            const c = s[0] ?? "";
-            return c && /[bcdfghjklmnpqrstvwxyz]/i.test(c)
-              ? [`${c}${s}`, `xtu${s}`, `ltu${s}`]
-              : [];
-          }),
+          next.map((s) => s[0] ?? "").filter((c) => c && /[bcdfghjklmnpqrstvwxyz]/i.test(c)),
         ),
       ];
-      out.push(merged.length > 0 ? merged : ["xtu", "ltu", "xtsu", "ltsu"]);
-      out.push(...rest.slice(1));
+      out.push(
+        consonants.length > 0
+          ? [...consonants, "xtu", "ltu", "xtsu", "ltsu"]
+          : ["xtu", "ltu", "xtsu", "ltsu"],
+      );
+      out.push(...rest);
       break;
     }
     if (src[i] === "ん") {
       const next = src[i + 1] ?? look;
-      const nextNeedNn = !next || /[あいうえおやゆよんaiueowny]/i.test(toHiragana(next));
+      const nextNeedNn = Boolean(next) && /[あいうえおやゆよんaiueowy]/i.test(toHiragana(next));
       out.push(nextNeedNn ? ["nn", "xn", "n'"] : ["n", "nn", "xn"]);
       i += 1;
       continue;
@@ -285,6 +330,114 @@ function tokenizeKana(kana: string, nextAfter = ""): string[][] {
     i += 1;
   }
   return out;
+}
+
+type DisplaySeg = {
+  kind: "space" | "single" | "kanji";
+  from: number;
+  to: number;
+};
+
+function displaySegs(chars: string[]): DisplaySeg[] {
+  const out: DisplaySeg[] = [];
+  let i = 0;
+  while (i < chars.length) {
+    const ch = chars[i] ?? "";
+    if (isSpace(ch)) {
+      out.push({ kind: "space", from: i, to: i + 1 });
+      i += 1;
+      continue;
+    }
+    if (isKanjiChar(ch)) {
+      const from = i;
+      while (i < chars.length && isKanjiChar(chars[i] ?? "")) i += 1;
+      out.push({ kind: "kanji", from, to: i });
+      continue;
+    }
+    if (isKanaChar(ch) && isSmallYoon(chars[i + 1] ?? "")) {
+      out.push({ kind: "single", from: i, to: i + 2 });
+      i += 2;
+      continue;
+    }
+    out.push({ kind: "single", from: i, to: i + 1 });
+    i += 1;
+  }
+  return out;
+}
+
+function kanjiTakes(
+  leftover: number,
+  charCount: number,
+  kanjiCharsLeft: number,
+  last: boolean,
+): number {
+  if (last || leftover <= 0) return Math.max(leftover, 0);
+  const share = Math.max(1, Math.round((leftover * charCount) / kanjiCharsLeft));
+  return Math.min(leftover, share);
+}
+
+function makeUnit(
+  spellings: string[],
+  displayFrom: number,
+  displayTo: number,
+  skip = false,
+): TypeUnit {
+  return {
+    spellings,
+    preferred: spellings[0] ?? "",
+    skip,
+    displayFrom,
+    displayTo,
+  };
+}
+
+function alignChunk(text: string, morae: string[][], displayOffset: number): TypeUnit[] {
+  const chars = Array.from(text);
+  const segs = displaySegs(chars);
+  const nonKanji = segs.filter((seg) => seg.kind !== "kanji").length;
+  let leftover = Math.max(0, morae.length - nonKanji);
+  let kanjiCharsLeft = segs
+    .filter((seg) => seg.kind === "kanji")
+    .reduce((sum, seg) => sum + (seg.to - seg.from), 0);
+  let kanjiLeft = segs.filter((seg) => seg.kind === "kanji").length;
+  const units: TypeUnit[] = [];
+  let moraIdx = 0;
+  for (const seg of segs) {
+    const from = displayOffset + seg.from;
+    const to = displayOffset + seg.to;
+    if (seg.kind === "space") {
+      if (moraIdx < morae.length && isSpace(morae[moraIdx]?.[0] ?? "")) moraIdx += 1;
+      units.push(makeUnit([" "], from, to, true));
+      continue;
+    }
+    if (seg.kind === "single") {
+      units.push(makeUnit(morae[moraIdx] ?? spellingsFor(chars[seg.from] ?? ""), from, to));
+      moraIdx += 1;
+      continue;
+    }
+    const charCount = seg.to - seg.from;
+    kanjiLeft -= 1;
+    const take = kanjiTakes(leftover, charCount, Math.max(kanjiCharsLeft, 1), kanjiLeft === 0);
+    leftover -= take;
+    kanjiCharsLeft -= charCount;
+    const count = take > 0 ? take : moraIdx < morae.length ? 1 : 0;
+    for (let n = 0; n < count && moraIdx < morae.length; n += 1) {
+      units.push(makeUnit(morae[moraIdx] ?? [chars[seg.from] ?? ""], from, to));
+      moraIdx += 1;
+    }
+  }
+  while (moraIdx < morae.length) {
+    const last = units[units.length - 1];
+    units.push(
+      makeUnit(
+        morae[moraIdx] ?? [""],
+        last?.displayFrom ?? displayOffset,
+        last?.displayTo ?? displayOffset + chars.length,
+      ),
+    );
+    moraIdx += 1;
+  }
+  return units;
 }
 
 function physicalKey(input: string): string {
@@ -302,29 +455,50 @@ function bump(
   map[key] = row;
 }
 
+function charsEqual(expected: string, actual: string): boolean {
+  if (isAsciiLetter(expected) && isAsciiLetter(actual)) {
+    return expected.toLowerCase() === actual.toLowerCase();
+  }
+  return expected === actual;
+}
+
+function spellingMatches(spelling: string, typed: string): boolean {
+  if (typed.length > spelling.length) return false;
+  for (let i = 0; i < typed.length; i += 1) {
+    if (!charsEqual(spelling[i] ?? "", typed[i] ?? "")) return false;
+  }
+  return true;
+}
+
+function matchingSpellings(spellings: string[], typed: string): string[] {
+  return spellings.filter((spelling) => spellingMatches(spelling, typed));
+}
+
+function skipReady(engine: TypingEngine) {
+  while (engine.moraIndex < engine.units.length && engine.units[engine.moraIndex]?.skip) {
+    engine.moraIndex += 1;
+  }
+}
+
 export function createEngine(chunks: ReplyChunk[]): TypingEngine {
   const display = chunks.map((c) => c.text).join("");
-  const morae: string[][] = [];
-  const charToMora: number[] = [];
+  const units: TypeUnit[] = [];
+  let offset = 0;
   for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex += 1) {
     const chunk = chunks[chunkIndex]!;
-    const start = morae.length;
     const nextKana = chunks[chunkIndex + 1]?.kana ?? "";
     const tokenized = tokenizeKana(chunk.kana, nextKana[0] ?? "");
-    if (tokenized.length === 0) {
-      tokenized.push(spellingsFor(chunk.kana || chunk.text));
-    }
-    morae.push(...tokenized);
-    const chars = Array.from(chunk.text);
-    chars.forEach((_, idx) => {
-      const moraAt = start + Math.min(idx, tokenized.length - 1);
-      charToMora.push(moraAt);
-    });
+    const aligned = alignChunk(
+      chunk.text,
+      tokenized.length > 0 ? tokenized : [spellingsFor(chunk.kana || chunk.text)],
+      offset,
+    );
+    units.push(...aligned);
+    offset += Array.from(chunk.text).length;
   }
-  return {
+  const engine: TypingEngine = {
     display,
-    morae,
-    charToMora,
+    units,
     moraIndex: 0,
     buffer: "",
     hits: 0,
@@ -337,42 +511,90 @@ export function createEngine(chunks: ReplyChunk[]): TypingEngine {
     lastKey: null,
     missFlash: false,
   };
+  skipReady(engine);
+  return engine;
+}
+
+export function cloneEngine(engine: TypingEngine): TypingEngine {
+  return {
+    ...engine,
+    units: engine.units.map((unit) => ({ ...unit, spellings: [...unit.spellings] })),
+    keyStats: { ...engine.keyStats },
+    fingerStats: { ...engine.fingerStats },
+    bigramStats: { ...engine.bigramStats },
+  };
 }
 
 export function isComplete(engine: TypingEngine): boolean {
-  return engine.moraIndex >= engine.morae.length;
+  skipReady(engine);
+  return engine.moraIndex >= engine.units.length;
 }
 
 export function currentGuide(engine: TypingEngine, count = 8): string {
-  if (isComplete(engine)) return "";
-  const parts: string[] = [];
-  for (let i = engine.moraIndex; i < engine.morae.length && parts.length < count; i += 1) {
-    const spell = engine.morae[i]?.[0] ?? "";
-    if (i === engine.moraIndex) {
-      parts.push(spell.slice(engine.buffer.length));
-    } else {
-      parts.push(spell);
+  return romajiGuideChars(engine)
+    .filter((item) => item.mark !== "typed")
+    .slice(0, count * 4)
+    .map((item) => item.ch)
+    .join("");
+}
+
+function currentSpelling(unit: TypeUnit, buffer: string): string {
+  return matchingSpellings(unit.spellings, buffer)[0] ?? unit.preferred;
+}
+
+export function romajiGuideChars(engine: TypingEngine): GuideChar[] {
+  const out: GuideChar[] = [];
+  for (let i = 0; i < engine.units.length; i += 1) {
+    const unit = engine.units[i]!;
+    if (unit.skip) {
+      out.push({ ch: " ", mark: i < engine.moraIndex ? "typed" : "pending" });
+      continue;
+    }
+    const spelling = i === engine.moraIndex ? currentSpelling(unit, engine.buffer) : unit.preferred;
+    for (let j = 0; j < spelling.length; j += 1) {
+      let mark: DisplayMark = "pending";
+      if (i < engine.moraIndex) mark = "typed";
+      else if (i === engine.moraIndex) {
+        if (j < engine.buffer.length) mark = "typed";
+        else if (j === engine.buffer.length) mark = "current";
+        else mark = "pending";
+      }
+      out.push({ ch: spelling[j] ?? "", mark });
     }
   }
-  return parts.join("");
+  return out;
 }
 
 export function marksFor(engine: TypingEngine): DisplayMark[] {
-  return Array.from(engine.display).map((_, idx) => {
-    const mora = engine.charToMora[idx] ?? 0;
-    if (mora < engine.moraIndex) return "typed";
-    if (mora === engine.moraIndex) return "current";
-    return "pending";
-  });
+  const marks: DisplayMark[] = Array.from(engine.display).map(() => "pending");
+  for (let i = 0; i < engine.units.length; i += 1) {
+    const unit = engine.units[i]!;
+    for (let d = unit.displayFrom; d < unit.displayTo; d += 1) {
+      const covering = engine.units.filter((u) => d >= u.displayFrom && d < u.displayTo && !u.skip);
+      if (covering.length === 0) {
+        marks[d] = "typed";
+        continue;
+      }
+      const first = engine.units.indexOf(covering[0]!);
+      const last = engine.units.indexOf(covering[covering.length - 1]!);
+      if (engine.moraIndex > last) marks[d] = "typed";
+      else if (engine.moraIndex >= first && engine.moraIndex <= last) marks[d] = "current";
+      else marks[d] = "pending";
+    }
+  }
+  return marks;
 }
 
 export function handleKey(engine: TypingEngine, key: string): KeyOutcome {
   if (key.length !== 1) return "ignore";
+  skipReady(engine);
   if (isComplete(engine)) return "complete";
+  if (isSpace(key)) return "ignore";
 
-  const expected = engine.morae[engine.moraIndex] ?? [];
+  const unit = engine.units[engine.moraIndex];
+  if (!unit) return "complete";
   const next = engine.buffer + key;
-  const matched = expected.filter((s) => s.startsWith(next));
+  const matched = matchingSpellings(unit.spellings, next);
   const phys = physicalKey(key);
   const finger = FINGER[phys];
 
@@ -397,15 +619,37 @@ export function handleKey(engine: TypingEngine, key: string): KeyOutcome {
   if (engine.lastKey) bump(engine.bigramStats, `${engine.lastKey}${phys}`, "hits");
   engine.lastKey = phys;
 
-  if (expected.includes(next)) {
+  if (matched.some((spelling) => spelling.length === next.length)) {
     engine.moraIndex += 1;
     engine.buffer = "";
+    skipReady(engine);
   }
   return isComplete(engine) ? "complete" : "hit";
+}
+
+export function typeKeys(engine: TypingEngine, keys: string): KeyOutcome {
+  let last: KeyOutcome = "ignore";
+  for (const key of keys) {
+    last = handleKey(engine, key);
+  }
+  return last;
 }
 
 export function accuracyOf(engine: TypingEngine): number {
   const total = engine.hits + engine.misses;
   if (total === 0) return 1;
   return engine.hits / total;
+}
+
+export function guideProgress(engine: TypingEngine): {
+  typed: number;
+  current: number;
+  pending: number;
+} {
+  const chars = romajiGuideChars(engine);
+  return {
+    typed: chars.filter((c) => c.mark === "typed").length,
+    current: chars.filter((c) => c.mark === "current").length,
+    pending: chars.filter((c) => c.mark === "pending").length,
+  };
 }

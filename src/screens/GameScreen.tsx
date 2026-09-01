@@ -2,10 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { mergeStats } from "../lib/analysis";
 import {
   accuracyOf,
+  cloneEngine,
   createEngine,
-  currentGuide,
   handleKey,
   marksFor,
+  romajiGuideChars,
   type TypingEngine,
 } from "../lib/romaji";
 import { calcReward, formatTime, formatYen, rankFor } from "../lib/reward";
@@ -55,61 +56,58 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
   });
   const jobStarted = useRef(Date.now());
   const finished = useRef(false);
-  const switching = useRef(false);
   const indexRef = useRef(0);
+  const engineRef = useRef(engine);
   const question = queue[index % Math.max(queue.length, 1)];
+
+  useEffect(() => {
+    engineRef.current = engine;
+  }, [engine]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === " ") event.preventDefault();
       if (event.ctrlKey || event.metaKey || event.altKey) return;
-      if (event.key.length !== 1 || switching.current || finished.current) return;
-      setEngine((current) => {
-        const next = {
-          ...current,
-          keyStats: { ...current.keyStats },
-          fingerStats: { ...current.fingerStats },
-          bigramStats: { ...current.bigramStats },
-        };
-        const result = handleKey(next, event.key);
-        const currentQuestion = queue[indexRef.current % Math.max(queue.length, 1)];
-        if (result === "complete" && currentQuestion) {
-          switching.current = true;
-          const elapsed = Date.now() - jobStarted.current;
-          const reward = calcReward({
-            difficulty,
-            charCount: currentQuestion.replyText.length,
-            hits: next.hits,
-            misses: next.misses,
-            elapsedMs: elapsed,
-          });
-          totals.current.hits += next.hits;
-          totals.current.misses += next.misses;
-          totals.current.maxCombo = Math.max(totals.current.maxCombo, next.maxCombo);
-          totals.current.revenue += reward;
-          totals.current.jobs += 1;
-          totals.current.keyStats = mergeStats(totals.current.keyStats, next.keyStats);
-          totals.current.fingerStats = mergeStats(totals.current.fingerStats, next.fingerStats);
-          totals.current.bigramStats = mergeStats(totals.current.bigramStats, next.bigramStats);
-          setRevenue(totals.current.revenue);
-          setJobs(totals.current.jobs);
-          setFeedback({
-            reward,
-            accuracy: accuracyOf(next),
-            combo: next.maxCombo,
-          });
-          window.setTimeout(() => {
-            setFeedback(null);
-            indexRef.current += 1;
-            setIndex(indexRef.current);
-            const nextQ = queue[indexRef.current % queue.length];
-            jobStarted.current = Date.now();
-            switching.current = false;
-            setEngine(createEngine(nextQ?.chunks ?? []));
-          }, 700);
-        }
-        return next;
-      });
+      if (event.key.length !== 1 || finished.current) return;
+      const next = cloneEngine(engineRef.current);
+      const result = handleKey(next, event.key);
+      const currentQuestion = queue[indexRef.current % Math.max(queue.length, 1)];
+      if (result === "complete" && currentQuestion) {
+        const elapsed = Date.now() - jobStarted.current;
+        const reward = calcReward({
+          difficulty,
+          charCount: currentQuestion.replyText.length,
+          hits: next.hits,
+          misses: next.misses,
+          elapsedMs: elapsed,
+        });
+        totals.current.hits += next.hits;
+        totals.current.misses += next.misses;
+        totals.current.maxCombo = Math.max(totals.current.maxCombo, next.maxCombo);
+        totals.current.revenue += reward;
+        totals.current.jobs += 1;
+        totals.current.keyStats = mergeStats(totals.current.keyStats, next.keyStats);
+        totals.current.fingerStats = mergeStats(totals.current.fingerStats, next.fingerStats);
+        totals.current.bigramStats = mergeStats(totals.current.bigramStats, next.bigramStats);
+        setRevenue(totals.current.revenue);
+        setJobs(totals.current.jobs);
+        setFeedback({
+          reward,
+          accuracy: accuracyOf(next),
+          combo: next.maxCombo,
+        });
+        window.setTimeout(() => setFeedback(null), 900);
+        indexRef.current += 1;
+        setIndex(indexRef.current);
+        const nextQ = queue[indexRef.current % queue.length];
+        jobStarted.current = Date.now();
+        const fresh = createEngine(nextQ?.chunks ?? []);
+        engineRef.current = fresh;
+        setEngine(fresh);
+        return;
+      }
+      engineRef.current = next;
+      setEngine(next);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -155,6 +153,7 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
 
   const marks = marksFor(engine);
   const chars = Array.from(engine.display);
+  const guide = romajiGuideChars(engine);
 
   return (
     <main className="c-stage">
@@ -215,8 +214,17 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
               );
             })}
           </div>
+          {guideOn ? (
+            <div className="c-romaji-full" aria-label="ローマ字ガイド">
+              {guide.map((item, i) => (
+                <span key={`${item.ch}-${i}`} className={`guide-${item.mark}`}>
+                  {item.ch}
+                </span>
+              ))}
+            </div>
+          ) : null}
           <div className="c-romaji-row">
-            <div className="c-romaji">{guideOn ? currentGuide(engine) : ""}</div>
+            <span />
             <button type="button" className="chip btn-soft" onClick={() => setGuideOn((v) => !v)}>
               ローマ字ガイド {guideOn ? "ON" : "OFF"}
             </button>
