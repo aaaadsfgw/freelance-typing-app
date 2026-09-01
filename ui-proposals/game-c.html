@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>最終 UI — C ベース + 返信感</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/shared.css" />
+    <link rel="stylesheet" href="css/game-c.css" />
+  </head>
+  <body class="game-c">
+    <nav class="mock-nav">
+      <span class="logo-mark">F</span>
+      <span class="brand">最終 UI</span>
+      <a href="index.html">比較</a>
+      <a href="title.html">タイトル</a>
+      <a href="game-a.html">ゲーム A</a>
+      <a href="game-b.html">ゲーム B</a>
+      <a class="is-active" href="game-c.html">ゲーム C</a>
+      <a href="result.html">結果</a>
+      <a href="analysis.html">分析</a>
+    </nav>
+
+    <main class="c-stage">
+      <section class="c-top">
+        <div class="c-money"><small>今月の売上</small>¥428,000</div>
+        <div class="c-timer">01:24</div>
+        <div class="c-side-stats">
+          <strong class="c-combo">42 COMBO</strong>
+          <span>完了 8 件</span>
+        </div>
+      </section>
+
+      <section class="c-client">
+        <div class="avatar avatar-ns">北</div>
+        <div class="c-client-meta">
+          <strong>株式会社 Northstar / 佐藤</strong>
+          <span class="role">Web 担当</span>
+          <span class="chip" style="background: var(--cyan-soft); color: var(--cyan)">EC サイト UI 改修</span>
+        </div>
+      </section>
+
+      <div class="c-thread">
+        <article class="c-request">
+          <div class="meta">佐藤 · 依頼</div>
+          <p>
+            商品詳細ページの購入ボタンがスマホ表示だと少し下にずれているようです。確認をお願いできますか？
+            できれば本日中に対応いただけると助かります。
+          </p>
+        </article>
+
+        <section class="c-type-board">
+          <div class="c-reply-label">
+            <span>あなた · 返信中</span>
+            <span>ローマ字で送信</span>
+          </div>
+          <div class="c-type">
+            <span class="typed">確認します。スマホ表示を</span><span class="caret miss">中</span><span class="pending">心に原因を調査して、本日中に修正内容をご連絡します。</span>
+          </div>
+          <div class="c-romaji-row">
+            <div class="c-romaji">chuushinni geninio chousashite...</div>
+            <div class="c-toggle">ローマ字ガイド ON</div>
+          </div>
+        </section>
+      </div>
+
+      <section class="c-pop">
+        <div>
+          <span>案件報酬</span>
+          <strong>+¥18,500</strong>
+        </div>
+        <div>
+          <span>正確性</span>
+          <strong style="color: #93c5fd">97.8%</strong>
+        </div>
+        <div>
+          <span>コンボ継続</span>
+          <strong style="color: #fda4af">42</strong>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

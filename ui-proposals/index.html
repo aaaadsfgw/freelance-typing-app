@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Freelance Desk — UI 案の比較</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/shared.css" />
+    <link rel="stylesheet" href="css/screens.css" />
+    <style>
+      .compare-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .compare-card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+      }
+      .compare-card h2 {
+        margin: 8px 0 10px;
+        font-size: 22px;
+      }
+      .compare-card ul {
+        padding-left: 18px;
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+      .compare-card .btn {
+        margin-top: 8px;
+      }
+      @media (max-width: 900px) {
+        .compare-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="theme-c">
+    <nav class="mock-nav">
+      <span class="logo-mark">F</span>
+      <span class="brand">UI 比較</span>
+      <a class="is-active" href="index.html">比較</a>
+      <a href="title.html">タイトル</a>
+      <a href="game-a.html">ゲーム A</a>
+      <a href="game-b.html">ゲーム B</a>
+      <a href="game-c.html">ゲーム C</a>
+      <a href="result.html">結果</a>
+      <a href="analysis.html">分析</a>
+    </nav>
+
+    <main class="page">
+      <section class="hero-card" style="margin-bottom: 20px">
+        <div class="kicker">最終 UI 確定</div>
+        <h1 style="font-size: 36px; margin: 8px 0 10px">C ベース + A の返信感</h1>
+        <p class="lead">
+          タイピング対象・売上・残り時間・コンボは C のまま大きく保ちます。
+          クライアント名・アイコン・案件名と、依頼のチャット吹き出し、返信中であることが分かる入力領域だけを A から足します。
+          入力文の重複はしません。
+        </p>
+      </section>
+
+      <section class="compare-grid">
+        <article class="compare-card">
+          <span class="chip" style="background: var(--indigo-soft); color: var(--indigo)">案 A · 一部採用</span>
+          <h2>チャット没入型</h2>
+          <p><strong>狙い:</strong> 業務チャットの中で返信している感覚。</p>
+          <ul>
+            <li>長所: 会話感が最も強い。返信欄と入力が自然。</li>
+            <li>短所: 売上や時間は端に寄る。ゲーム感は控えめ。</li>
+            <li>タイピング: 対象文は大きいが、チャットと入力欄で二重。</li>
+            <li>仕事感: クライアントと話している感じが強い。</li>
+            <li>ゲーム性: HUD が小さい。</li>
+            <li>発展: 複数スレッドや既読演出を足しやすい。</li>
+            <li>ローマ字: いま打つ音だけ表示。</li>
+          </ul>
+          <a class="btn btn-primary" href="game-a.html">案 A を開く</a>
+        </article>
+
+        <article class="compare-card">
+          <span class="chip" style="background: var(--cyan-soft); color: var(--cyan)">案 B</span>
+          <h2>管理画面型</h2>
+          <p><strong>狙い:</strong> 案件を回しているフリーランス SaaS 感。</p>
+          <ul>
+            <li>長所: 売上・時間・案件が一覧できる。仕事を回す感覚。</li>
+            <li>短所: 情報量が多く、タイピングへの視線移動が起きやすい。</li>
+            <li>タイピング: 専用カードはあるが、画面の主人公ではない。</li>
+            <li>仕事感: 案件管理している感じが最も強い。</li>
+            <li>ゲーム性: KPI カードで数字は見えるが、爽快感は中程度。</li>
+            <li>発展: キュー、ステータス、クライアント一覧を足しやすい。</li>
+            <li>ローマ字: 全文を常時小さめ表示。</li>
+          </ul>
+          <a class="btn btn-primary" href="game-b.html">案 B を開く</a>
+        </article>
+
+        <article class="compare-card" style="box-shadow: 0 0 0 3px var(--rose)">
+          <span class="chip" style="background: var(--rose-soft); color: var(--rose)">案 C · ベース</span>
+          <h2>ゲーム性重視型</h2>
+          <p><strong>狙い:</strong> 稼いだ額とコンボが見える爽快感。</p>
+          <ul>
+            <li>長所: 売上・時間・コンボが瞬間で分かる。入力文が最大。</li>
+            <li>短所: チャット没入感は弱い。案件の文脈は一段小さくなる。</li>
+            <li>タイピング: 3 案で最も読みやすい。</li>
+            <li>仕事感: 世界観は残るが、ゲーム画面に近い。</li>
+            <li>ゲーム性: 報酬加算とコンボが最も目立つ。</li>
+            <li>発展: コンボ演出やスコア演出を足しやすい。</li>
+            <li>ローマ字: ON / OFF トグルの見た目。</li>
+          </ul>
+          <a class="btn btn-primary" href="game-c.html">案 C を開く</a>
+        </article>
+      </section>
+
+      <section class="panel" style="margin-top: 20px">
+        <h2>共通画面</h2>
+        <p style="color: var(--muted)">最終ゲーム画面は game-c.html。共通画面は C のトーンのままです。</p>
+        <div class="actions">
+          <a class="btn btn-ghost" href="title.html">タイトル</a>
+          <a class="btn btn-ghost" href="result.html">結果</a>
+          <a class="btn btn-ghost" href="analysis.html">分析</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

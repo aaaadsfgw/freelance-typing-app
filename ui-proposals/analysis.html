@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Freelance Desk — タイピング分析</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/shared.css" />
+    <link rel="stylesheet" href="css/screens.css" />
+  </head>
+  <body class="theme-c">
+    <nav class="mock-nav">
+      <span class="logo-mark">F</span>
+      <span class="brand">Freelance Desk</span>
+      <a href="index.html">比較</a>
+      <a href="title.html">タイトル</a>
+      <a href="game-a.html">ゲーム A</a>
+      <a href="game-b.html">ゲーム B</a>
+      <a href="game-c.html">ゲーム C</a>
+      <a href="result.html">結果</a>
+      <a class="is-active" href="analysis.html">分析</a>
+    </nav>
+
+    <main class="page">
+      <section class="panel" style="margin-bottom: 16px">
+        <div class="kicker">直近プレイ + 累計</div>
+        <h1 style="margin: 6px 0 8px; font-size: 32px">タイピング分析</h1>
+        <p style="margin: 0; color: var(--muted)">
+          どのキー、どの指、どの組み合わせでミスしやすいかを確認します。高度な AI 分析はありません。
+        </p>
+        <div class="stat-grid" style="padding: 18px 0 0">
+          <div class="stat">
+            <div class="label">累計入力</div>
+            <div class="value">12,480</div>
+          </div>
+          <div class="stat">
+            <div class="label">累計正確性</div>
+            <div class="value">96.4%</div>
+          </div>
+          <div class="stat">
+            <div class="label">平均速度</div>
+            <div class="value">388 打/分</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="analysis-grid">
+        <section class="panel">
+          <h2>苦手キー</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>キー</th>
+                <th>入力</th>
+                <th>ミス</th>
+                <th>ミス率</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">R</td>
+                <td>214</td>
+                <td>18</td>
+                <td>8.4%</td>
+              </tr>
+              <tr>
+                <td class="mono">U</td>
+                <td>196</td>
+                <td>14</td>
+                <td>7.1%</td>
+              </tr>
+              <tr>
+                <td class="mono">T</td>
+                <td>241</td>
+                <td>13</td>
+                <td>5.4%</td>
+              </tr>
+              <tr>
+                <td class="mono">O</td>
+                <td>188</td>
+                <td>9</td>
+                <td>4.8%</td>
+              </tr>
+              <tr>
+                <td class="mono">N</td>
+                <td>302</td>
+                <td>11</td>
+                <td>3.6%</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel">
+          <h2>苦手な指</h2>
+          <div class="finger-list">
+            <div>
+              <div class="row-item"><span>左人差し指</span><strong>6.8%</strong></div>
+              <div class="bar"><span style="width: 86%"></span></div>
+            </div>
+            <div>
+              <div class="row-item"><span>右人差し指</span><strong>5.1%</strong></div>
+              <div class="bar"><span style="width: 64%"></span></div>
+            </div>
+            <div>
+              <div class="row-item"><span>左薬指</span><strong>4.4%</strong></div>
+              <div class="bar"><span style="width: 55%"></span></div>
+            </div>
+            <div>
+              <div class="row-item"><span>右中指</span><strong>2.9%</strong></div>
+              <div class="bar"><span style="width: 36%"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" style="grid-column: 1 / -1">
+          <h2>苦手なキー遷移</h2>
+          <div class="bigram-list" style="grid-template-columns: repeat(4, 1fr)">
+            <div class="stat">
+              <div class="label">遷移</div>
+              <div class="value mono">tr</div>
+              <div class="label">ミス 12 / 率 9.2%</div>
+            </div>
+            <div class="stat">
+              <div class="label">遷移</div>
+              <div class="value mono">ou</div>
+              <div class="label">ミス 9 / 率 7.4%</div>
+            </div>
+            <div class="stat">
+              <div class="label">遷移</div>
+              <div class="value mono">pr</div>
+              <div class="label">ミス 8 / 率 6.8%</div>
+            </div>
+            <div class="stat">
+              <div class="label">遷移</div>
+              <div class="value mono">io</div>
+              <div class="label">ミス 6 / 率 5.1%</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="actions" style="margin-top: 18px">
+        <a class="btn btn-primary" href="title.html">タイトルへ戻る</a>
+        <a class="btn btn-ghost" href="result.html">結果画面を見る</a>
+      </div>
+    </main>
+  </body>
+</html>

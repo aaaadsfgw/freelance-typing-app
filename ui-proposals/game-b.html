@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UI 案 B — フリーランス管理画面型</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/shared.css" />
+    <link rel="stylesheet" href="css/game-b.css" />
+  </head>
+  <body class="game-b">
+    <nav class="mock-nav">
+      <span class="logo-mark">F</span>
+      <span class="brand">案 B</span>
+      <a href="index.html">比較</a>
+      <a href="title.html">タイトル</a>
+      <a href="game-a.html">ゲーム A</a>
+      <a class="is-active" href="game-b.html">ゲーム B</a>
+      <a href="game-c.html">ゲーム C</a>
+      <a href="result.html">結果</a>
+      <a href="analysis.html">分析</a>
+    </nav>
+
+    <div class="b-shell">
+      <aside class="b-side">
+        <h1>Freelance Desk</h1>
+        <h2>対応中</h2>
+        <div class="b-job is-active">
+          株式会社 Northstar
+          <small>EC サイト UI 改修 · 佐藤</small>
+        </div>
+        <h2>待機キュー</h2>
+        <div class="b-job">合同会社 Lumio<small>LP 文言確認</small></div>
+        <div class="b-job">Orion inc.<small>PR #128 レビュー</small></div>
+        <div class="b-job">山田商店<small>見積もりの確認</small></div>
+      </aside>
+
+      <main class="b-main">
+        <section class="b-kpis">
+          <div class="b-kpi money"><span>今月の売上</span><strong>¥428,000</strong></div>
+          <div class="b-kpi time"><span>残り時間</span><strong>01:24</strong></div>
+          <div class="b-kpi"><span>コンボ</span><strong>42</strong></div>
+          <div class="b-kpi"><span>完了案件 / 正確性</span><strong>8 · 97.8%</strong></div>
+        </section>
+
+        <section class="b-grid">
+          <article class="b-card">
+            <span class="chip" style="background: var(--cyan-soft); color: var(--cyan)">進行中</span>
+            <h3>EC サイト UI 改修</h3>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px">
+              <div class="avatar avatar-ns">北</div>
+              <div>
+                <strong>株式会社 Northstar</strong><br />
+                <span style="color: var(--muted); font-size: 13px">佐藤 / Web 担当</span>
+              </div>
+            </div>
+            <div class="b-request">
+              商品詳細ページの購入ボタンがスマホ表示だと少し下にずれているようです。確認をお願いできますか？
+              できれば本日中に対応いただけると助かります。
+            </div>
+            <div class="b-reward">今回の案件報酬見込み +¥18,500</div>
+          </article>
+
+          <article class="b-card">
+            <div class="kicker">返信ドラフト</div>
+            <h3>ローマ字で送信する</h3>
+            <div class="b-type">
+              <span class="typed">確認します。スマホ表示を</span><span class="caret miss">中</span><span class="pending">心に原因を調査して、本日中に修正内容をご連絡します。</span>
+            </div>
+            <div class="b-romaji">
+              kakuninshimasu. sumahohyoujiwo <strong>chu</strong>ushinni geninio chousashite, honjitsuchuuni shuuseinaio gorenrakushimasu.
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

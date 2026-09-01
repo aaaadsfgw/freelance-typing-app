@@ -1,0 +1,160 @@
+body.game-a {
+  height: 100vh;
+  overflow: hidden;
+  background: #eef1f7;
+}
+
+.a-app {
+  height: calc(100vh - 49px);
+  display: grid;
+  grid-template-rows: 56px 1fr auto;
+}
+
+.a-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+
+.a-hud-left,
+.a-hud-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.a-stat {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.a-stat span {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.a-stat strong {
+  font-size: 15px;
+}
+
+.a-stat.time strong {
+  color: var(--amber);
+}
+
+.a-stat.money strong {
+  color: var(--green);
+}
+
+.a-stat.combo strong {
+  color: var(--rose);
+}
+
+.a-chat {
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 20px 12px;
+  overflow: auto;
+}
+
+.a-client-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.a-client-head h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.a-client-head p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.bubble {
+  max-width: 86%;
+  padding: 14px 16px;
+  border-radius: 18px;
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+
+.bubble-in {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 6px;
+}
+
+.bubble-out {
+  margin-left: auto;
+  background: var(--indigo-soft);
+  border-bottom-right-radius: 6px;
+}
+
+.bubble .meta {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.a-type {
+  font-size: 17px;
+  line-height: 1.85;
+  font-weight: 600;
+}
+
+.a-romaji {
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--indigo);
+}
+
+.a-compose {
+  border-top: 1px solid var(--line);
+  background: #fff;
+  padding: 14px 20px 20px;
+}
+
+.a-compose-box {
+  max-width: 760px;
+  margin: 0 auto;
+  border: 2px solid var(--indigo);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: #fafafe;
+}
+
+.a-compose-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--indigo);
+  margin-bottom: 6px;
+}
+
+.a-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 120px;
+  width: 220px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+}
+
+.a-toast b {
+  color: var(--green);
+}

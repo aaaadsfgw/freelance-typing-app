@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UI 案 A — チャット没入型</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/shared.css" />
+    <link rel="stylesheet" href="css/game-a.css" />
+  </head>
+  <body class="game-a">
+    <nav class="mock-nav">
+      <span class="logo-mark">F</span>
+      <span class="brand">案 A</span>
+      <a href="index.html">比較</a>
+      <a href="title.html">タイトル</a>
+      <a class="is-active" href="game-a.html">ゲーム A</a>
+      <a href="game-b.html">ゲーム B</a>
+      <a href="game-c.html">ゲーム C</a>
+      <a href="result.html">結果</a>
+      <a href="analysis.html">分析</a>
+    </nav>
+
+    <div class="a-app">
+      <header class="a-hud">
+        <div class="a-hud-left">
+          <span class="logo-mark">F</span>
+          <strong>Freelance Desk</strong>
+          <span class="chip" style="background: var(--cyan-soft); color: var(--cyan)">EC サイト UI 改修</span>
+        </div>
+        <div class="a-hud-right">
+          <div class="a-stat time"><span>残り</span><strong>01:24</strong></div>
+          <div class="a-stat money"><span>今月の売上</span><strong>¥428,000</strong></div>
+          <div class="a-stat combo"><span>コンボ</span><strong>42</strong></div>
+          <div class="a-stat"><span>完了</span><strong>8 件</strong></div>
+        </div>
+      </header>
+
+      <main class="a-chat">
+        <div class="a-client-head">
+          <div class="avatar avatar-ns">北</div>
+          <div>
+            <h2>株式会社 Northstar / 佐藤</h2>
+            <p>Web 担当 · いま対応中</p>
+          </div>
+        </div>
+
+        <article class="bubble bubble-in">
+          <div class="meta">佐藤 · 依頼</div>
+          商品詳細ページの購入ボタンがスマホ表示だと少し下にずれているようです。確認をお願いできますか？
+          できれば本日中に対応いただけると助かります。
+        </article>
+
+        <article class="bubble bubble-in">
+          <div class="meta">佐藤 · 昨日</div>
+          先日のバナー差し替え、本番反映まで確認できました。ありがとうございます。
+        </article>
+
+        <article class="bubble bubble-out">
+          <div class="meta">あなた · 昨日</div>
+          こちらこそです。表示崩れが出たらまた共有ください。
+        </article>
+
+        <article class="bubble bubble-out">
+          <div class="meta">あなた · 返信中 · ミス</div>
+          <div class="a-type">
+            <span class="typed">確認します。スマホ表示を</span><span class="caret miss">中</span><span class="pending">心に原因を調査して、本日中に修正内容をご連絡します。</span>
+          </div>
+          <div class="a-romaji">いま打つ音: chu</div>
+        </article>
+      </main>
+
+      <footer class="a-compose">
+        <div class="a-compose-box">
+          <div class="a-compose-label">返信をローマ字で入力</div>
+          <div class="a-type">
+            <span class="typed">確認します。スマホ表示を</span><span class="caret miss">中</span><span class="pending">心に原因を調査して、本日中に修正内容をご連絡します。</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <aside class="a-toast">
+      直前の案件<br />
+      <b>+¥18,500</b> · 97.8% · 42 combo
+    </aside>
+  </body>
+</html>
