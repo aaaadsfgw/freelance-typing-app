@@ -25,17 +25,18 @@ describe("romaji", () => {
   });
 
   it("accepts tsu/tu, chi/ti, fu/hu", () => {
-    const tsu = createEngine([{ text: "つ", kana: "つ" }]);
-    typeAll(tsu, "tu");
-    expect(isComplete(tsu)).toBe(true);
-
-    const chi = createEngine([{ text: "ち", kana: "ち" }]);
-    typeAll(chi, "ti");
-    expect(isComplete(chi)).toBe(true);
-
-    const fu = createEngine([{ text: "ふ", kana: "ふ" }]);
-    typeAll(fu, "hu");
-    expect(isComplete(fu)).toBe(true);
+    for (const [text, keys] of [
+      ["つ", "tsu"],
+      ["つ", "tu"],
+      ["ち", "chi"],
+      ["ち", "ti"],
+      ["ふ", "fu"],
+      ["ふ", "hu"],
+    ] as const) {
+      const engine = createEngine([{ text, kana: text }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
   });
 
   it("does not advance on a miss", () => {

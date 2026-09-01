@@ -646,13 +646,16 @@ export function romajiGuideChars(engine: TypingEngine): GuideChar[] {
       continue;
     }
     const spelling = unit.preferred;
+    const prefixOk = i === engine.moraIndex && spellingMatches(spelling, engine.buffer);
     for (let j = 0; j < spelling.length; j += 1) {
       let mark: DisplayMark = "pending";
       if (i < engine.moraIndex) mark = "typed";
-      else if (i === engine.moraIndex) {
+      else if (i === engine.moraIndex && prefixOk) {
         if (j < engine.buffer.length) mark = "typed";
         else if (j === engine.buffer.length) mark = "current";
         else mark = "pending";
+      } else if (i === engine.moraIndex && j === 0) {
+        mark = "current";
       }
       out.push({ ch: spelling[j] ?? "", mark });
     }
