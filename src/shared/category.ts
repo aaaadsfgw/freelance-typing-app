@@ -1,0 +1,93 @@
+export type CategoryTone = {
+  key: string;
+  label: string;
+  bg: string;
+  fg: string;
+};
+
+const TONES: Record<string, CategoryTone> = {
+  UI: { key: "UI", label: "UI", bg: "#eef2ff", fg: "#4338ca" },
+  API: { key: "API", label: "API", bg: "#ecfeff", fg: "#0e7490" },
+  DB: { key: "DB", label: "DB", bg: "#f5f3ff", fg: "#6d28d9" },
+  BUG: { key: "BUG", label: "BUG", bg: "#fff1f2", fg: "#be123c" },
+  PR: { key: "PR", label: "PR", bg: "#ecfdf3", fg: "#15803d" },
+  RELEASE: { key: "RELEASE", label: "RELEASE", bg: "#fff7ed", fg: "#c2410c" },
+  URGENT: { key: "URGENT", label: "URGENT", bg: "#fef2f2", fg: "#b91c1c" },
+  DESIGN: { key: "DESIGN", label: "DESIGN", bg: "#fdf4ff", fg: "#a21caf" },
+  MEETING: { key: "MEETING", label: "MEETING", bg: "#f0f9ff", fg: "#0369a1" },
+  SEO: { key: "SEO", label: "SEO", bg: "#f0fdf4", fg: "#166534" },
+  CMS: { key: "CMS", label: "CMS", bg: "#eef2ff", fg: "#3730a3" },
+  FORM: { key: "FORM", label: "FORM", bg: "#ecfeff", fg: "#155e75" },
+  AUTH: { key: "AUTH", label: "AUTH", bg: "#f8fafc", fg: "#334155" },
+  DATA: { key: "DATA", label: "DATA", bg: "#f1f5f9", fg: "#0f172a" },
+  OPS: { key: "OPS", label: "OPS", bg: "#fffbeb", fg: "#b45309" },
+};
+
+const ALIAS: Record<string, string> = {
+  確認: "MEETING",
+  報告: "MEETING",
+  進捗: "MEETING",
+  納期: "MEETING",
+  日程調整: "MEETING",
+  打合せ: "MEETING",
+  顧客説明: "MEETING",
+  見積もり: "MEETING",
+  仕様変更: "MEETING",
+  追加料金: "MEETING",
+  修正完了: "UI",
+  動作確認: "BUG",
+  レスポンシブ: "UI",
+  デザイン: "DESIGN",
+  デザイン確認: "DESIGN",
+  UI修正: "UI",
+  LP: "DESIGN",
+  フォーム: "FORM",
+  バリデーション: "FORM",
+  CMS: "CMS",
+  WordPress: "CMS",
+  SEO: "SEO",
+  OGP: "SEO",
+  アクセス解析: "SEO",
+  API: "API",
+  webhook: "API",
+  DB: "DB",
+  SQL: "DB",
+  認証: "AUTH",
+  ログイン: "AUTH",
+  権限: "AUTH",
+  Git: "PR",
+  PR: "PR",
+  Issue: "PR",
+  レビュー: "PR",
+  test: "PR",
+  エラー: "BUG",
+  障害: "URGENT",
+  緊急対応: "URGENT",
+  リリース: "RELEASE",
+  deploy: "RELEASE",
+  staging: "OPS",
+  保守: "OPS",
+  cache: "OPS",
+  performance: "OPS",
+  CSV: "DATA",
+  データ修正: "DATA",
+  追加機能: "UI",
+  メンション: "PR",
+  仕様確認: "MEETING",
+  スケジュール: "MEETING",
+  緊急: "URGENT",
+  404: "BUG",
+  500: "BUG",
+  bug: "BUG",
+  release: "RELEASE",
+  production: "RELEASE",
+  mobile: "UI",
+  browser: "UI",
+  accessibility: "UI",
+  review: "PR",
+};
+
+export function categoryTone(category: string): CategoryTone {
+  const mapped = TONES[category] ?? TONES[ALIAS[category] ?? ""] ?? TONES.MEETING;
+  return mapped ?? TONES.MEETING!;
+}

@@ -9,20 +9,27 @@ type Props = {
   onAnalysis: () => void;
 };
 
-const RANK_TONE: Record<Rank, { bg: string; fg: string }> = {
-  SS: { bg: "var(--violet-soft)", fg: "var(--violet)" },
-  S: { bg: "var(--amber-soft)", fg: "#92400e" },
-  A: { bg: "var(--indigo-soft)", fg: "var(--indigo)" },
-  B: { bg: "var(--green-soft)", fg: "var(--green)" },
-  C: { bg: "var(--rose-soft)", fg: "var(--rose)" },
+const RANK_TONE: Record<Rank, { bg: string; fg: string; note: string }> = {
+  SS: { bg: "var(--violet-soft)", fg: "var(--violet)", note: "今月、指名が止まりません。" },
+  S: { bg: "var(--amber-soft)", fg: "#92400e", note: "安定して高単価を回せています。" },
+  A: { bg: "var(--indigo-soft)", fg: "var(--indigo)", note: "次の更新契約が見えてきました。" },
+  B: { bg: "var(--green-soft)", fg: "var(--green)", note: "堅実な一ヶ月でした。" },
+  C: { bg: "var(--rose-soft)", fg: "var(--rose)", note: "来月はもう一段、速度を上げましょう。" },
 };
 
 export function ResultScreen({ result, onRetry, onTitle, onAnalysis }: Props) {
   const tone = RANK_TONE[result.rank];
   return (
     <main className="page">
-      <section className="panel">
+      <section className={`panel result-panel rank-${result.rank}`}>
         <div className="result-hero">
+          <img
+            className="result-art"
+            src="/assets/illustrations/month-done.svg"
+            alt=""
+            width={420}
+            height={200}
+          />
           <div className="kicker">今月の売上</div>
           <div className="amount">{formatYen(result.revenue)}</div>
           <div className="result-rating">
@@ -33,6 +40,7 @@ export function ResultScreen({ result, onRetry, onTitle, onAnalysis }: Props) {
             <span className="result-score">{result.totalScore} / 100</span>
           </div>
           <p className="rank-banner">{result.comment}</p>
+          <p className="result-note">{tone.note}</p>
         </div>
         <div className="score-split">
           <div>

@@ -12,6 +12,8 @@ import {
 import { evaluatePlay } from "../lib/rating";
 import { calcReward, formatTime, formatYen } from "../lib/reward";
 import type { Difficulty, PlayResult, Question } from "../shared/types";
+import { Avatar } from "../ui/Avatar";
+import { CategoryChip } from "../ui/CategoryChip";
 
 const SESSION_SEC = 90;
 
@@ -179,17 +181,14 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
       </section>
 
       <section className="c-client">
-        <div className="avatar">{question.clientIcon}</div>
+        <Avatar src={question.clientIcon} name={question.clientName} />
         <div className="c-client-meta">
           <strong>
             {question.clientName} / {question.clientRole.split(" / ")[0]}
           </strong>
-          <span className="role" style={{ color: "var(--muted)", fontSize: 13 }}>
-            {question.clientRole}
-          </span>
-          <span className="chip" style={{ background: "var(--cyan-soft)", color: "var(--cyan)" }}>
-            {question.projectName}
-          </span>
+          <span className="role">{question.clientRole}</span>
+          <CategoryChip category={question.category} />
+          <span className="chip project-chip">{question.projectName}</span>
         </div>
       </section>
 

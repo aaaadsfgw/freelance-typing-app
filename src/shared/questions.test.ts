@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   cloneEngine,
@@ -8,7 +11,10 @@ import {
   romajiGuideChars,
   typeKeys,
 } from "../lib/romaji";
+import { CLIENT_LIST } from "./clients";
 import { QUESTIONS } from "./questions";
+
+const publicDir = join(dirname(fileURLToPath(import.meta.url)), "../../public");
 
 describe("questions", () => {
   it("keeps display text aligned with chunks", () => {
@@ -19,11 +25,36 @@ describe("questions", () => {
   });
 
   it("has playable counts per difficulty", () => {
-    expect(QUESTIONS.filter((q) => q.difficulty === "beginner").length).toBeGreaterThanOrEqual(8);
+    expect(QUESTIONS.filter((q) => q.difficulty === "beginner").length).toBeGreaterThanOrEqual(30);
     expect(QUESTIONS.filter((q) => q.difficulty === "intermediate").length).toBeGreaterThanOrEqual(
-      8,
+      35,
     );
-    expect(QUESTIONS.filter((q) => q.difficulty === "advanced").length).toBeGreaterThanOrEqual(8);
+    expect(QUESTIONS.filter((q) => q.difficulty === "advanced").length).toBeGreaterThanOrEqual(35);
+    expect(QUESTIONS.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it("has unique ids, reply texts, and request texts", () => {
+    const ids = QUESTIONS.map((item) => item.id);
+    const replies = QUESTIONS.map((item) => item.replyText);
+    const requests = QUESTIONS.map((item) => item.requestText);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(new Set(replies).size).toBe(replies.length);
+    expect(new Set(requests).size).toBe(requests.length);
+  });
+
+  it("points every client avatar to a local file", () => {
+    expect(CLIENT_LIST.length).toBeGreaterThanOrEqual(10);
+    const fromPublic = (path: string) => join(publicDir, path.replace(/^\//, ""));
+    for (const client of CLIENT_LIST) {
+      expect(client.avatar.startsWith("/assets/avatars/")).toBe(true);
+      expect(existsSync(fromPublic(client.avatar))).toBe(true);
+    }
+    for (const question of QUESTIONS) {
+      expect(question.clientIcon.startsWith("/assets/avatars/")).toBe(true);
+      expect(existsSync(fromPublic(question.clientIcon))).toBe(true);
+    }
+    expect(existsSync(fromPublic("/assets/illustrations/desk-work.svg"))).toBe(true);
+    expect(existsSync(fromPublic("/assets/illustrations/month-done.svg"))).toBe(true);
   });
 
   it("can finish every question without spaces or letter case", () => {
