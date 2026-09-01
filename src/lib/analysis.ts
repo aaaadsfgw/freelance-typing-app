@@ -1,4 +1,16 @@
 import type { KeyStat } from "../shared/types";
+import type { TypingEngine } from "./romaji";
+
+export type PlayTotals = {
+  hits: number;
+  misses: number;
+  maxCombo: number;
+  revenue: number;
+  jobs: number;
+  keyStats: Record<string, KeyStat>;
+  fingerStats: Record<string, KeyStat>;
+  bigramStats: Record<string, KeyStat>;
+};
 
 function missRate(stat: KeyStat): number {
   const total = stat.hits + stat.misses;
@@ -32,4 +44,21 @@ export function mergeStats(
     next[key] = { hits: cur.hits + stat.hits, misses: cur.misses + stat.misses };
   }
   return next;
+}
+
+export function absorbEngineStats(
+  totals: PlayTotals,
+  engine: TypingEngine,
+  options?: { reward?: number; completedJob?: boolean },
+): void {
+  totals.hits += engine.hits;
+  totals.misses += engine.misses;
+  totals.maxCombo = Math.max(totals.maxCombo, engine.maxCombo);
+  totals.keyStats = mergeStats(totals.keyStats, engine.keyStats);
+  totals.fingerStats = mergeStats(totals.fingerStats, engine.fingerStats);
+  totals.bigramStats = mergeStats(totals.bigramStats, engine.bigramStats);
+  if (options?.completedJob) {
+    totals.jobs += 1;
+    totals.revenue += options.reward ?? 0;
+  }
 }

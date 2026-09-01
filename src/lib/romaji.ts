@@ -48,7 +48,7 @@ const KANA_BASE: Record<string, string[]> = {
   ゐ: ["wyi"],
   ゑ: ["wye"],
   を: ["wo", "o"],
-  ん: ["n", "nn", "xn", "n'"],
+  ん: ["nn", "n", "xn", "n'"],
   が: ["ga"],
   ぎ: ["gi"],
   ぐ: ["gu"],
@@ -248,6 +248,7 @@ export type TypeUnit = {
   skip: boolean;
   displayFrom: number;
   displayTo: number;
+  chosen?: string;
 };
 
 export type GuideChar = {
@@ -415,8 +416,8 @@ function tokenizeKana(kana: string, nextAfter = ""): string[][] {
     }
     if (src[i] === "ん") {
       const next = src[i + 1] ?? look;
-      const nextNeedNn = Boolean(next) && /[あいうえおやゆよんaiueowy]/i.test(toHiragana(next));
-      out.push(nextNeedNn ? ["nn", "xn", "n'"] : ["n", "nn", "xn", "n'"]);
+      const nextNeedNn = !next || /[あいうえおやゆよんaiueowy]/i.test(toHiragana(next));
+      out.push(nextNeedNn ? ["nn", "xn", "n'"] : ["nn", "n", "xn", "n'"]);
       i += 1;
       continue;
     }
@@ -573,6 +574,29 @@ function matchingSpellings(spellings: string[], typed: string): string[] {
   return spellings.filter((spelling) => spellingMatches(spelling, typed));
 }
 
+function completeSpellings(spellings: string[], typed: string): string[] {
+  return matchingSpellings(spellings, typed).filter((spelling) => spelling.length === typed.length);
+}
+
+function spellingForGuide(unit: TypeUnit, buffer: string, current: boolean): string {
+  if (!current) return unit.chosen ?? unit.preferred;
+  if (!buffer) return unit.preferred;
+  const matched = matchingSpellings(unit.spellings, buffer);
+  if (matched.length === 0) return unit.preferred;
+  if (matched.includes(unit.preferred) || spellingMatches(unit.preferred, buffer)) {
+    return unit.preferred;
+  }
+  return matched[0] ?? unit.preferred;
+}
+
+function commitUnit(engine: TypingEngine, spelling: string) {
+  const unit = engine.units[engine.moraIndex];
+  if (unit) unit.chosen = spelling;
+  engine.moraIndex += 1;
+  engine.buffer = "";
+  skipReady(engine);
+}
+
 function skipReady(engine: TypingEngine) {
   while (engine.moraIndex < engine.units.length && engine.units[engine.moraIndex]?.skip) {
     engine.moraIndex += 1;
@@ -645,17 +669,15 @@ export function romajiGuideChars(engine: TypingEngine): GuideChar[] {
       out.push({ ch: " ", mark: i < engine.moraIndex ? "typed" : "pending" });
       continue;
     }
-    const spelling = unit.preferred;
-    const prefixOk = i === engine.moraIndex && spellingMatches(spelling, engine.buffer);
+    const current = i === engine.moraIndex;
+    const spelling = spellingForGuide(unit, engine.buffer, current);
     for (let j = 0; j < spelling.length; j += 1) {
       let mark: DisplayMark = "pending";
       if (i < engine.moraIndex) mark = "typed";
-      else if (i === engine.moraIndex && prefixOk) {
+      else if (current) {
         if (j < engine.buffer.length) mark = "typed";
         else if (j === engine.buffer.length) mark = "current";
         else mark = "pending";
-      } else if (i === engine.moraIndex && j === 0) {
-        mark = "current";
       }
       out.push({ ch: spelling[j] ?? "", mark });
     }
@@ -684,6 +706,10 @@ export function marksFor(engine: TypingEngine): DisplayMark[] {
 }
 
 export function handleKey(engine: TypingEngine, key: string): KeyOutcome {
+  return consumeKey(engine, key, false);
+}
+
+function consumeKey(engine: TypingEngine, key: string, replay: boolean): KeyOutcome {
   if (key.length !== 1) return "ignore";
   skipReady(engine);
   if (isComplete(engine)) return "complete";
@@ -697,6 +723,11 @@ export function handleKey(engine: TypingEngine, key: string): KeyOutcome {
   const finger = FINGER[phys];
 
   if (matched.length === 0) {
+    const ready = completeSpellings(unit.spellings, engine.buffer);
+    if (!replay && ready.length > 0) {
+      commitUnit(engine, ready[0]!);
+      return consumeKey(engine, key, true);
+    }
     engine.misses += 1;
     engine.combo = 0;
     engine.missFlash = true;
@@ -717,10 +748,10 @@ export function handleKey(engine: TypingEngine, key: string): KeyOutcome {
   if (engine.lastKey) bump(engine.bigramStats, `${engine.lastKey}${phys}`, "hits");
   engine.lastKey = phys;
 
-  if (matched.some((spelling) => spelling.length === next.length)) {
-    engine.moraIndex += 1;
-    engine.buffer = "";
-    skipReady(engine);
+  const finished = completeSpellings(unit.spellings, next);
+  const longer = matched.some((spelling) => spelling.length > next.length);
+  if (finished.length > 0 && !longer) {
+    commitUnit(engine, finished[0]!);
   }
   return isComplete(engine) ? "complete" : "hit";
 }

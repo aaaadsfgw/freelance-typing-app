@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { mergeStats } from "../lib/analysis";
+import { absorbEngineStats } from "../lib/analysis";
 import {
   accuracyOf,
   cloneEngine,
@@ -81,14 +81,7 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
           misses: next.misses,
           elapsedMs: elapsed,
         });
-        totals.current.hits += next.hits;
-        totals.current.misses += next.misses;
-        totals.current.maxCombo = Math.max(totals.current.maxCombo, next.maxCombo);
-        totals.current.revenue += reward;
-        totals.current.jobs += 1;
-        totals.current.keyStats = mergeStats(totals.current.keyStats, next.keyStats);
-        totals.current.fingerStats = mergeStats(totals.current.fingerStats, next.fingerStats);
-        totals.current.bigramStats = mergeStats(totals.current.bigramStats, next.bigramStats);
+        absorbEngineStats(totals.current, next, { reward, completedJob: true });
         setRevenue(totals.current.revenue);
         setJobs(totals.current.jobs);
         setFeedback({
@@ -120,6 +113,7 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
       setLeft(Math.ceil(remaining));
       if (remaining <= 0 && !finished.current) {
         finished.current = true;
+        absorbEngineStats(totals.current, engineRef.current);
         const hits = totals.current.hits;
         const misses = totals.current.misses;
         const speed = (hits / SESSION_SEC) * 60;

@@ -73,7 +73,7 @@ describe("romaji", () => {
       { text: "API の", kana: "API の" },
       { text: "件", kana: "けん" },
     ]);
-    typeAll(engine, "APInoken");
+    typeAll(engine, "APInokenn");
     expect(isComplete(engine)).toBe(true);
     expect(engine.misses).toBe(0);
     expect(handleKey(createEngine([{ text: "PR #128", kana: "PR #128" }]), " ")).toBe("ignore");
@@ -223,11 +223,32 @@ describe("romaji", () => {
     expect(isComplete(ltu)).toBe(true);
   });
 
-  it("accepts n/nn/n' for ん without swallowing the next vowel", () => {
-    const safe = createEngine([{ text: "かん", kana: "かん" }]);
-    typeAll(safe, "kan");
-    expect(isComplete(safe)).toBe(true);
+  it("accepts n and nn before a consonant without counting a miss", () => {
+    for (const [text, keys] of [
+      ["かんた", "kanta"],
+      ["かんた", "kannta"],
+      ["かんじ", "kanji"],
+      ["かんじ", "kannji"],
+    ] as const) {
+      const engine = createEngine([{ text, kana: text }]);
+      const outcomes = Array.from(keys).map((key) => handleKey(engine, key));
+      expect(outcomes.includes("miss"), keys).toBe(false);
+      expect(isComplete(engine), keys).toBe(true);
+      expect(engine.hits).toBe(keys.length);
+    }
+  });
 
+  it("accepts both n and nn in 確認します", () => {
+    for (const keys of ["kakuninshimasu.", "kakuninnshimasu."]) {
+      const engine = createEngine([{ text: "確認します。", kana: "かくにんします。" }]);
+      const outcomes = Array.from(keys).map((key) => handleKey(engine, key));
+      expect(outcomes.includes("miss"), keys).toBe(false);
+      expect(isComplete(engine), keys).toBe(true);
+      expect(engine.hits).toBe(keys.length);
+    }
+  });
+
+  it("requires nn or n' before a vowel and does not complete かんあ as kana", () => {
     const nn = createEngine([{ text: "かんあ", kana: "かんあ" }]);
     typeAll(nn, "kanna");
     expect(isComplete(nn)).toBe(true);
@@ -239,6 +260,42 @@ describe("romaji", () => {
     const swallowed = createEngine([{ text: "かんあ", kana: "かんあ" }]);
     typeAll(swallowed, "kana");
     expect(isComplete(swallowed)).toBe(false);
+    expect(swallowed.misses).toBeGreaterThan(0);
+  });
+
+  it("uses nn as the representative ん guide and commits n on the next consonant", () => {
+    const engine = createEngine([{ text: "かんた", kana: "かんた" }]);
+    expect(
+      romajiGuideChars(engine)
+        .map((item) => item.ch)
+        .join(""),
+    ).toBe("kannta");
+    typeAll(engine, "kan");
+    expect(isComplete(engine)).toBe(false);
+    expect(engine.buffer).toBe("n");
+    expect(handleKey(engine, "t")).toBe("hit");
+    expect(engine.buffer).toBe("t");
+    expect(engine.misses).toBe(0);
+    typeAll(engine, "a");
+    expect(isComplete(engine)).toBe(true);
+  });
+
+  it("commits ん before punctuation with n and the punct key", () => {
+    const engine = createEngine([{ text: "かん。", kana: "かん。" }]);
+    typeAll(engine, "kan.");
+    expect(isComplete(engine)).toBe(true);
+    expect(engine.misses).toBe(0);
+  });
+
+  it("uses nn for a word-final ん", () => {
+    const engine = createEngine([{ text: "かん", kana: "かん" }]);
+    expect(
+      romajiGuideChars(engine)
+        .map((item) => item.ch)
+        .join(""),
+    ).toBe("kann");
+    typeAll(engine, "kann");
+    expect(isComplete(engine)).toBe(true);
   });
 
   it("accepts common foreign-sound IME spellings", () => {
@@ -264,21 +321,66 @@ describe("romaji", () => {
     }
   });
 
-  it("keeps the representative guide while accepting another spelling", () => {
-    const engine = createEngine([{ text: "し", kana: "し" }]);
+  it("starts from the representative guide and follows the chosen spelling", () => {
+    const shi = createEngine([{ text: "し", kana: "し" }]);
     expect(
-      romajiGuideChars(engine)
+      romajiGuideChars(shi)
         .map((item) => item.ch)
         .join(""),
     ).toBe("shi");
-    expect(handleKey(engine, "s")).toBe("hit");
+    expect(handleKey(shi, "s")).toBe("hit");
     expect(
-      romajiGuideChars(engine)
+      romajiGuideChars(shi)
         .map((item) => item.ch)
         .join(""),
     ).toBe("shi");
-    expect(handleKey(engine, "i")).toBe("complete");
-    expect(isComplete(engine)).toBe(true);
+    expect(romajiGuideChars(shi).find((item) => item.mark === "current")?.ch).toBe("h");
+    expect(handleKey(shi, "i")).toBe("complete");
+    expect(
+      romajiGuideChars(shi)
+        .map((item) => item.ch)
+        .join(""),
+    ).toBe("si");
+    expect(romajiGuideChars(shi).every((item) => item.mark === "typed")).toBe(true);
+
+    const chi = createEngine([{ text: "ち", kana: "ち" }]);
+    expect(
+      romajiGuideChars(chi)
+        .map((item) => item.ch)
+        .join(""),
+    ).toBe("chi");
+    expect(handleKey(chi, "t")).toBe("hit");
+    const afterT = romajiGuideChars(chi);
+    expect(afterT.map((item) => item.ch).join("")).toBe("ti");
+    expect(afterT.find((item) => item.mark === "current")?.ch).toBe("i");
+    expect(afterT.some((item) => item.ch === "c" && item.mark === "current")).toBe(false);
+    expect(handleKey(chi, "i")).toBe("complete");
+  });
+
+  it("types お待ちください with chi or ti", () => {
+    for (const keys of ["omachikudasai.", "omatikudasai."]) {
+      const engine = createEngine([{ text: "お待ちください。", kana: "おまちください。" }]);
+      const outcomes = Array.from(keys).map((key) => handleKey(engine, key));
+      expect(outcomes.includes("miss"), keys).toBe(false);
+      expect(isComplete(engine), keys).toBe(true);
+      expect(engine.hits).toBe(keys.length);
+      expect(marksFor(engine).every((mark) => mark === "typed")).toBe(true);
+      expect(romajiGuideChars(engine).every((item) => item.mark === "typed")).toBe(true);
+    }
+  });
+
+  it("accepts alternate spellings inside real phrases", () => {
+    const cases: Array<[string, string, string]> = [
+      ["しゃしん", "しゃしん", "syasinn"],
+      ["じゃ", "じゃ", "zya"],
+      ["ちゃ", "ちゃ", "tya"],
+      ["てぃ", "てぃ", "teli"],
+    ];
+    for (const [text, kana, keys] of cases) {
+      const engine = createEngine([{ text, kana }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
   });
 
   it("treats a valid prefix as a hit and an unknown prefix as a miss", () => {
