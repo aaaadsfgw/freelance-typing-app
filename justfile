@@ -29,6 +29,9 @@ db-seed-remote: db-migrate-remote
     vp exec node --experimental-strip-types scripts/build-seed.ts > seed/questions.sql
     vp exec wrangler d1 execute freelance-desk --remote --file=seed/questions.sql
 
+db-create:
+    vp exec wrangler d1 create freelance-desk
+
 cf-login:
     vp exec wrangler login
 
