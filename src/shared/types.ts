@@ -1,5 +1,7 @@
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 
+export type Rank = "C" | "B" | "A" | "S" | "SS";
+
 export type ReplyChunk = {
   text: string;
   kana: string;
@@ -33,8 +35,13 @@ export type PlayResult = {
   maxCombo: number;
   jobsCompleted: number;
   avgReward: number;
-  rankLabel: string;
+  totalScore: number;
+  rank: Rank;
+  title: string;
   comment: string;
+  speedScore: number;
+  accuracyScore: number;
+  jobsScore: number;
   keyStats: Record<string, KeyStat>;
   fingerStats: Record<string, KeyStat>;
   bigramStats: Record<string, KeyStat>;

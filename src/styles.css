@@ -197,6 +197,59 @@ button {
   line-height: 1;
 }
 
+.result-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 4px;
+}
+
+.result-rank {
+  min-width: 72px;
+  padding: 8px 18px;
+  border-radius: 16px;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.result-title {
+  font-size: 20px;
+}
+
+.result-score {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.score-split {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 16px 24px 0;
+}
+
+.score-split div {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eef2f7;
+  text-align: center;
+}
+
+.score-split span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.score-split strong {
+  font-size: 16px;
+}
+
 .rank-banner {
   display: inline-block;
   margin: 8px 0 0;

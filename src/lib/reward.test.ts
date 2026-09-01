@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcReward, rankFor } from "./reward";
+import { calcReward } from "./reward";
 
 describe("reward", () => {
   it("pays more for advanced and longer text", () => {
@@ -19,12 +19,5 @@ describe("reward", () => {
     });
     expect(long).toBeGreaterThan(short);
     expect(short).toBeGreaterThanOrEqual(2000);
-  });
-
-  it("maps revenue to rank copy", () => {
-    expect(rankFor(180_000).label).toBe("駆け出し");
-    expect(rankFor(500_000).label).toBe("安定");
-    expect(rankFor(800_000).label).toBe("売れっ子エンジニア");
-    expect(rankFor(1_200_000).label).toBe("月商 100 万");
   });
 });

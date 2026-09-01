@@ -27,31 +27,6 @@ export function calcReward(input: {
   return Math.max(2000, Math.round(raw / 500) * 500);
 }
 
-export function rankFor(revenue: number): { label: string; comment: string } {
-  if (revenue >= 1_000_000) {
-    return {
-      label: "月商 100 万",
-      comment: "月商 100 万円突破。そろそろ案件を断る勇気も必要です。",
-    };
-  }
-  if (revenue >= 800_000) {
-    return {
-      label: "売れっ子エンジニア",
-      comment: "売れっ子エンジニア。予定表が埋まり始めています。",
-    };
-  }
-  if (revenue >= 500_000) {
-    return {
-      label: "安定",
-      comment: "安定して案件を回せるフリーランス。",
-    };
-  }
-  return {
-    label: "駆け出し",
-    comment: "まずは小さな案件から実績を積もう。",
-  };
-}
-
 export function formatYen(value: number): string {
   return `¥${value.toLocaleString("ja-JP")}`;
 }

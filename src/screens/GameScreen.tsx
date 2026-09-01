@@ -9,7 +9,8 @@ import {
   romajiGuideChars,
   type TypingEngine,
 } from "../lib/romaji";
-import { calcReward, formatTime, formatYen, rankFor } from "../lib/reward";
+import { evaluatePlay } from "../lib/rating";
+import { calcReward, formatTime, formatYen } from "../lib/reward";
 import type { Difficulty, PlayResult, Question } from "../shared/types";
 
 const SESSION_SEC = 90;
@@ -120,7 +121,13 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
         const accuracy = hits + misses === 0 ? 1 : hits / (hits + misses);
         const avgReward =
           totals.current.jobs === 0 ? 0 : Math.round(totals.current.revenue / totals.current.jobs);
-        const rank = rankFor(totals.current.revenue);
+        const rating = evaluatePlay({
+          difficulty,
+          speed,
+          accuracy,
+          jobsCompleted: totals.current.jobs,
+          maxCombo: totals.current.maxCombo,
+        });
         onFinish({
           difficulty,
           revenue: totals.current.revenue,
@@ -130,8 +137,13 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
           maxCombo: totals.current.maxCombo,
           jobsCompleted: totals.current.jobs,
           avgReward,
-          rankLabel: rank.label,
-          comment: rank.comment,
+          totalScore: rating.totalScore,
+          rank: rating.rank,
+          title: rating.title,
+          comment: rating.comment,
+          speedScore: rating.speedScore,
+          accuracyScore: rating.accuracyScore,
+          jobsScore: rating.jobsScore,
           keyStats: totals.current.keyStats,
           fingerStats: totals.current.fingerStats,
           bigramStats: totals.current.bigramStats,

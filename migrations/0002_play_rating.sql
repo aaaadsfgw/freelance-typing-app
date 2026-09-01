@@ -1,0 +1,3 @@
+ALTER TABLE plays ADD COLUMN total_score REAL;
+ALTER TABLE plays ADD COLUMN rank TEXT;
+ALTER TABLE plays ADD COLUMN title TEXT;

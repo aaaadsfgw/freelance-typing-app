@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import type { Difficulty, Question, ReplyChunk } from "../shared/types";
+import type { Difficulty, Question, Rank, ReplyChunk } from "../shared/types";
 
 type Bindings = { DB: D1Database };
 
@@ -27,8 +27,10 @@ type PlayBody = {
   maxCombo: number;
   jobsCompleted: number;
   avgReward: number;
-  rankLabel: string;
+  rank: Rank;
+  title: string;
   comment: string;
+  totalScore: number;
   keyStats: unknown;
   fingerStats: unknown;
   bigramStats: unknown;
@@ -66,31 +68,45 @@ app.post("/api/plays", async (c) => {
     return c.json({ error: "invalid" }, 400);
   }
   const id = crypto.randomUUID();
-  await c.env.DB.prepare(
-    `INSERT INTO plays (
-      id, anonymous_id, difficulty, revenue, speed, accuracy, misses, max_combo,
-      jobs_completed, avg_reward, rank_label, comment, key_stats, finger_stats, bigram_stats, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  )
-    .bind(
-      id,
-      body.anonymousId,
-      body.difficulty,
-      body.revenue,
-      body.speed,
-      body.accuracy,
-      body.misses,
-      body.maxCombo,
-      body.jobsCompleted,
-      body.avgReward,
-      body.rankLabel,
-      body.comment,
-      JSON.stringify(body.keyStats ?? {}),
-      JSON.stringify(body.fingerStats ?? {}),
-      JSON.stringify(body.bigramStats ?? {}),
-      new Date().toISOString(),
+  const createdAt = new Date().toISOString();
+  const shared = [
+    id,
+    body.anonymousId,
+    body.difficulty,
+    body.revenue,
+    body.speed,
+    body.accuracy,
+    body.misses,
+    body.maxCombo,
+    body.jobsCompleted,
+    body.avgReward,
+    body.title ?? body.rank,
+    body.comment,
+    JSON.stringify(body.keyStats ?? {}),
+    JSON.stringify(body.fingerStats ?? {}),
+    JSON.stringify(body.bigramStats ?? {}),
+    createdAt,
+  ] as const;
+  try {
+    await c.env.DB.prepare(
+      `INSERT INTO plays (
+        id, anonymous_id, difficulty, revenue, speed, accuracy, misses, max_combo,
+        jobs_completed, avg_reward, rank_label, comment, key_stats, finger_stats, bigram_stats, created_at,
+        total_score, rank, title
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
-    .run();
+      .bind(...shared, body.totalScore ?? 0, body.rank ?? "C", body.title ?? "")
+      .run();
+  } catch {
+    await c.env.DB.prepare(
+      `INSERT INTO plays (
+        id, anonymous_id, difficulty, revenue, speed, accuracy, misses, max_combo,
+        jobs_completed, avg_reward, rank_label, comment, key_stats, finger_stats, bigram_stats, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(...shared)
+      .run();
+  }
   return c.json({ id });
 });
 
@@ -113,8 +129,15 @@ app.get("/api/plays", async (c) => {
       maxCombo: row.max_combo,
       jobsCompleted: row.jobs_completed,
       avgReward: row.avg_reward,
-      rankLabel: row.rank_label,
+      totalScore: Number(row.total_score ?? 0),
+      rank: (row.rank as Rank | null) ?? "C",
+      title:
+        (typeof row.title === "string" && row.title) ||
+        (typeof row.rank_label === "string" ? row.rank_label : ""),
       comment: row.comment,
+      speedScore: 0,
+      accuracyScore: 0,
+      jobsScore: 0,
       keyStats: JSON.parse(String(row.key_stats)),
       fingerStats: JSON.parse(String(row.finger_stats)),
       bigramStats: JSON.parse(String(row.bigram_stats)),
