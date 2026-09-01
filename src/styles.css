@@ -449,6 +449,41 @@ th {
     radial-gradient(circle at 96% 8%, rgba(252, 231, 243, 0.55) 0, transparent 24%);
 }
 
+.c-workspace {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.c-channel {
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--indigo);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.c-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green);
+  font-size: 12px;
+}
+
+.c-online::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--green);
+}
+
 .c-top {
   display: grid;
   grid-template-columns: 1fr auto 1fr;

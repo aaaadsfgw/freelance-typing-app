@@ -12,6 +12,7 @@ import {
   typeKeys,
 } from "../lib/romaji";
 import { CLIENT_LIST } from "./clients";
+import { PERSONA_LINES, personaLineFor } from "./persona";
 import { QUESTIONS } from "./questions";
 
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), "../../public");
@@ -97,6 +98,23 @@ describe("questions", () => {
     expect(a02?.replyText).toContain("入れます");
     expect(a02?.replyReading).toContain("いれます");
     expect(a02?.replyReading).not.toContain("はいれます");
+  });
+
+  it("appends one persona line with matching kana", () => {
+    const totalLines =
+      PERSONA_LINES.beginner.length +
+      PERSONA_LINES.intermediate.length +
+      PERSONA_LINES.advanced.length;
+    expect(PERSONA_LINES.beginner.length).toBeGreaterThanOrEqual(10);
+    expect(PERSONA_LINES.intermediate.length).toBeGreaterThanOrEqual(10);
+    expect(PERSONA_LINES.advanced.length).toBeGreaterThanOrEqual(10);
+    expect(totalLines).toBeGreaterThanOrEqual(30);
+    for (const question of QUESTIONS) {
+      const punch = personaLineFor(question.id, question.difficulty);
+      expect(question.replyText.endsWith(punch.text)).toBe(true);
+      expect(question.replyReading.endsWith(punch.kana)).toBe(true);
+      expect(question.chunks.at(-1)).toEqual(punch);
+    }
   });
 
   it("keeps the same progress when keys arrive through a cloned engine", () => {

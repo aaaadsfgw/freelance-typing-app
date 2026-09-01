@@ -1,9 +1,9 @@
 import type { Difficulty } from "../shared/types";
 
 const BASE: Record<Difficulty, number> = {
-  beginner: 8000,
-  intermediate: 14000,
-  advanced: 22000,
+  beginner: 400000,
+  intermediate: 650000,
+  advanced: 950000,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -24,7 +24,7 @@ export function calcReward(input: {
   const speedFactor = clamp(0.8 + (kpm - 200) / 500, 0.8, 1.3);
   const accuracyFactor = 0.75 + accuracy * 0.3;
   const raw = BASE[input.difficulty] * lengthFactor * speedFactor * accuracyFactor;
-  return Math.max(2000, Math.round(raw / 500) * 500);
+  return Math.max(200000, Math.round(raw / 10000) * 10000);
 }
 
 export function formatYen(value: number): string {

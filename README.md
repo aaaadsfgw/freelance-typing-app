@@ -1,6 +1,6 @@
-# Freelance Desk
+# Dev Desk
 
-タイピングで稼ぐ、フリーランス IT エンジニア体験。
+タイピングで伸ばす、今どきの IT 企業 Web エンジニア体験。
 
 ```bash
 just db-seed

@@ -26,7 +26,7 @@ describe("rating", () => {
     });
     expect(["S", "SS"]).toContain(result.rank);
     expect(result.totalScore).toBeGreaterThanOrEqual(RATING.rankThresholds.S);
-    expect(result.comment).toContain("指名");
+    expect(result.comment).toContain("信頼");
   });
 
   it("drops rank when speed is high but accuracy is low", () => {
@@ -81,6 +81,7 @@ describe("rating", () => {
     });
     expect(empty.totalScore).toBe(0);
     expect(empty.rank).toBe("C");
+    expect(empty.title).toBe("新米エンジニア");
   });
 
   it("uses the rank thresholds", () => {

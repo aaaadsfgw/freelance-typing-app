@@ -28,7 +28,7 @@ export function App() {
       setGameKey((value) => value + 1);
       setScreen("game");
     } catch {
-      setError("案件を取得できませんでした。D1 に問題データがあるか確認してください。");
+      setError("メッセージを取得できませんでした。D1 に問題データがあるか確認してください。");
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ export function App() {
       ) : null}
       {loading ? (
         <p className="page" style={{ paddingTop: 0 }}>
-          案件を準備しています…
+          メッセージを準備しています…
         </p>
       ) : null}
       {error ? (

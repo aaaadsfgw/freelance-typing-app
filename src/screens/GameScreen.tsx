@@ -11,9 +11,17 @@ import {
 } from "../lib/romaji";
 import { evaluatePlay } from "../lib/rating";
 import { calcReward, formatTime, formatYen } from "../lib/reward";
+import { APP_NAME, CHANNEL_NAME } from "../shared/copy";
 import type { Difficulty, PlayResult, Question } from "../shared/types";
 import { Avatar } from "../ui/Avatar";
 import { CategoryChip } from "../ui/CategoryChip";
+
+function chatClock(id: string): string {
+  const n = Array.from(id).reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+  const hour = 9 + (n % 9);
+  const minute = (n * 7) % 60;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
 
 const SESSION_SEC = 90;
 
@@ -156,7 +164,7 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
   }, [difficulty, onFinish]);
 
   if (!question) {
-    return <main className="page">案件を読み込めませんでした。</main>;
+    return <main className="page">メッセージを読み込めませんでした。</main>;
   }
 
   const marks = marksFor(engine);
@@ -165,9 +173,14 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
 
   return (
     <main className="c-stage">
+      <div className="c-workspace">
+        <strong>{APP_NAME}</strong>
+        <span className="c-channel">{CHANNEL_NAME}</span>
+        <span className="c-online">オンライン</span>
+      </div>
       <section className="c-top">
         <div className="c-money">
-          <small>今月の売上</small>
+          <small>ゲーム内年収</small>
           {formatYen(revenue)}
         </div>
         <div className="c-timer">
@@ -176,7 +189,7 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
         </div>
         <div className="c-side-stats">
           <strong className="c-combo">{engine.combo} COMBO</strong>
-          <span>完了 {jobs} 件</span>
+          <span>返信 {jobs} 件</span>
         </div>
       </section>
 
@@ -194,7 +207,9 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
 
       <div className="c-thread">
         <article className="c-request">
-          <div className="meta">{question.clientRole.split(" / ")[0]} · 依頼</div>
+          <div className="meta">
+            {question.clientRole.split(" / ")[0]} · {chatClock(question.id)}
+          </div>
           <p>{question.requestText}</p>
         </article>
 
@@ -240,8 +255,8 @@ export function GameScreen({ difficulty, questions, onFinish }: Props) {
       {feedback ? (
         <section className="c-pop">
           <div>
-            <span>案件報酬</span>
-            <strong>{formatYen(feedback.reward)}</strong>
+            <span>年収 UP</span>
+            <strong>+{formatYen(feedback.reward)}</strong>
           </div>
           <div>
             <span>正確性</span>
