@@ -1,9 +1,9 @@
 import type { ReplyChunk } from "../shared/types";
 
-const KANA: Record<string, string[]> = {
+const KANA_BASE: Record<string, string[]> = {
   あ: ["a"],
-  い: ["i"],
-  う: ["u", "wu"],
+  い: ["i", "yi"],
+  う: ["u", "wu", "whu"],
   え: ["e"],
   お: ["o"],
   か: ["ka", "ca"],
@@ -45,8 +45,10 @@ const KANA: Record<string, string[]> = {
   れ: ["re"],
   ろ: ["ro"],
   わ: ["wa"],
+  ゐ: ["wyi"],
+  ゑ: ["wye"],
   を: ["wo", "o"],
-  ん: ["n", "nn", "xn"],
+  ん: ["n", "nn", "xn", "n'"],
   が: ["ga"],
   ぎ: ["gi"],
   ぐ: ["gu"],
@@ -72,60 +74,156 @@ const KANA: Record<string, string[]> = {
   ぷ: ["pu"],
   ぺ: ["pe"],
   ぽ: ["po"],
-  ぁ: ["la", "xa"],
-  ぃ: ["li", "xi", "lyi", "xyi"],
-  ぅ: ["lu", "xu"],
-  ぇ: ["le", "xe", "lye", "xye"],
-  ぉ: ["lo", "xo"],
-  ゃ: ["lya", "xya"],
-  ゅ: ["lyu", "xyu"],
-  ょ: ["lyo", "xyo"],
+  ぁ: ["xa", "la"],
+  ぃ: ["xi", "li", "xyi", "lyi"],
+  ぅ: ["xu", "lu"],
+  ぇ: ["xe", "le", "xye", "lye"],
+  ぉ: ["xo", "lo"],
+  ゃ: ["xya", "lya"],
+  ゅ: ["xyu", "lyu"],
+  ょ: ["xyo", "lyo"],
+  ゎ: ["xwa", "lwa"],
   っ: ["xtu", "ltu", "xtsu", "ltsu"],
   ー: ["-", "ー"],
   きゃ: ["kya"],
+  きぃ: ["kyi"],
   きゅ: ["kyu"],
+  きぇ: ["kye"],
   きょ: ["kyo"],
   しゃ: ["sha", "sya"],
+  しぃ: ["syi", "shyi"],
   しゅ: ["shu", "syu"],
+  しぇ: ["she", "sye"],
   しょ: ["sho", "syo"],
   ちゃ: ["cha", "tya", "cya"],
+  ちぃ: ["tyi", "cyi"],
   ちゅ: ["chu", "tyu", "cyu"],
+  ちぇ: ["che", "tye", "cye"],
   ちょ: ["cho", "tyo", "cyo"],
   にゃ: ["nya"],
+  にぃ: ["nyi"],
   にゅ: ["nyu"],
+  にぇ: ["nye"],
   にょ: ["nyo"],
   ひゃ: ["hya"],
+  ひぃ: ["hyi"],
   ひゅ: ["hyu"],
+  ひぇ: ["hye"],
   ひょ: ["hyo"],
   みゃ: ["mya"],
+  みぃ: ["myi"],
   みゅ: ["myu"],
+  みぇ: ["mye"],
   みょ: ["myo"],
   りゃ: ["rya"],
+  りぃ: ["ryi"],
   りゅ: ["ryu"],
+  りぇ: ["rye"],
   りょ: ["ryo"],
   ぎゃ: ["gya"],
+  ぎぃ: ["gyi"],
   ぎゅ: ["gyu"],
+  ぎぇ: ["gye"],
   ぎょ: ["gyo"],
   じゃ: ["ja", "jya", "zya"],
+  じぃ: ["jyi", "zyi"],
   じゅ: ["ju", "jyu", "zyu"],
+  じぇ: ["je", "jye", "zye"],
   じょ: ["jo", "jyo", "zyo"],
   びゃ: ["bya"],
+  びぃ: ["byi"],
   びゅ: ["byu"],
+  びぇ: ["bye"],
   びょ: ["byo"],
   ぴゃ: ["pya"],
+  ぴぃ: ["pyi"],
   ぴゅ: ["pyu"],
+  ぴぇ: ["pye"],
   ぴょ: ["pyo"],
-  ふぁ: ["fa", "fua", "hwa"],
-  ふぃ: ["fi", "fui", "hwi"],
-  ふぇ: ["fe", "fue", "hwe"],
-  ふぉ: ["fo", "fuo", "hwo"],
+  ふぁ: ["fa", "fuxa", "fula", "hwa"],
+  ふぃ: ["fi", "fuxi", "fuli", "hwi", "fyi"],
+  ふぅ: ["fwu"],
+  ふぇ: ["fe", "fuxe", "fule", "hwe", "fye"],
+  ふぉ: ["fo", "fuxo", "fulo", "hwo"],
+  ふゃ: ["fya"],
+  ふゅ: ["fyu"],
+  ふょ: ["fyo"],
   てぃ: ["thi", "texi", "teli"],
+  てぅ: ["twu"],
+  てゅ: ["thu"],
   でぃ: ["dhi", "dexi", "deli"],
+  でぅ: ["dwu"],
+  でゅ: ["dhu"],
+  とぁ: ["twa"],
+  とぃ: ["twi"],
   とぅ: ["twu", "toxu", "tolu"],
-  うぃ: ["wi", "uxi", "uli"],
-  うぇ: ["we", "uxe", "ule"],
+  とぇ: ["twe"],
+  とぉ: ["two"],
+  どぁ: ["dwa"],
+  どぃ: ["dwi"],
+  どぅ: ["dwu", "doxu", "dolu"],
+  どぇ: ["dwe"],
+  どぉ: ["dwo"],
+  うぁ: ["wha", "uxa", "ula"],
+  うぃ: ["wi", "uxi", "uli", "whi"],
+  うぇ: ["we", "uxe", "ule", "whe"],
   うぉ: ["who", "uxo", "ulo"],
+  ゔ: ["vu"],
+  ゔぁ: ["va", "vuxa", "vula"],
+  ゔぃ: ["vi", "vuxi", "vuli", "vyi"],
+  ゔぇ: ["ve", "vuxe", "vule", "vye"],
+  ゔぉ: ["vo", "vuxo", "vulo"],
+  ゔゅ: ["vyu"],
+  くぁ: ["qa", "kwa", "kuxa", "kula", "qwa"],
+  くぃ: ["qi", "kwi", "kuxi", "kuli", "qyi", "qwi"],
+  くぅ: ["qwu"],
+  くぇ: ["qe", "kwe", "kuxe", "kule", "qye", "qwe"],
+  くぉ: ["qo", "kwo", "kuxo", "kulo", "qwo"],
+  くゎ: ["kwa"],
+  ぐぁ: ["gwa", "guxa", "gula"],
+  ぐぃ: ["gwi", "guxi", "guli"],
+  ぐぇ: ["gwe", "guxe", "gule"],
+  ぐぉ: ["gwo", "guxo", "gulo"],
+  つぁ: ["tsa", "tuxa", "tula"],
+  つぃ: ["tsi", "tuxi", "tuli"],
+  つぇ: ["tse", "tuxe", "tule"],
+  つぉ: ["tso", "tuxo", "tulo"],
+  いぇ: ["ye", "ixe", "ile"],
 };
+
+function isSmallYoonChar(ch: string): boolean {
+  return "ぁぃぅぇぉゃゅょァィゥェォャュョゎヮ".includes(ch);
+}
+
+function uniqueSpellings(items: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const item of items) {
+    const key = item.toLowerCase();
+    if (!item || seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
+
+function expandImeSpellings(table: Record<string, string[]>): Record<string, string[]> {
+  const next: Record<string, string[]> = { ...table };
+  for (const key of Object.keys(table)) {
+    const chars = Array.from(key);
+    if (chars.length !== 2) continue;
+    const [head, tail] = chars;
+    if (!head || !tail || !isSmallYoonChar(tail)) continue;
+    const headSpells = table[head] ?? [];
+    const tailSpells = table[tail] ?? [];
+    if (headSpells.length === 0 || tailSpells.length === 0) continue;
+    const composed = headSpells.flatMap((a) => tailSpells.map((b) => `${a}${b}`));
+    next[key] = uniqueSpellings([...(table[key] ?? []), ...composed]);
+  }
+  return next;
+}
+
+const KANA = expandImeSpellings(KANA_BASE);
 
 const PUNCT: Record<string, string[]> = {
   "。": [".", "。"],
@@ -258,7 +356,7 @@ function isAsciiLetter(ch: string): boolean {
 }
 
 function isSmallYoon(ch: string): boolean {
-  return "ぁぃぅぇぉゃゅょァィゥェォャュョ".includes(ch);
+  return isSmallYoonChar(ch);
 }
 
 function isKanaChar(ch: string): boolean {
@@ -298,9 +396,10 @@ function tokenizeKana(kana: string, nextAfter = ""): string[][] {
   let i = 0;
   while (i < src.length) {
     const two = src.slice(i, i + 2);
-    if (src[i] === "っ" && i + 1 < src.length) {
-      const rest = tokenizeKana(src.slice(i + 1), look);
-      const next = rest[0] ?? ["a"];
+    if (src[i] === "っ") {
+      const restSrc = src.slice(i + 1);
+      const rest = restSrc.length > 0 ? tokenizeKana(restSrc, look) : [];
+      const next = rest[0] ?? (look ? tokenizeKana(look, "")[0] : undefined) ?? ["a"];
       const consonants = [
         ...new Set(
           next.map((s) => s[0] ?? "").filter((c) => c && /[bcdfghjklmnpqrstvwxyz]/i.test(c)),
@@ -317,7 +416,7 @@ function tokenizeKana(kana: string, nextAfter = ""): string[][] {
     if (src[i] === "ん") {
       const next = src[i + 1] ?? look;
       const nextNeedNn = Boolean(next) && /[あいうえおやゆよんaiueowy]/i.test(toHiragana(next));
-      out.push(nextNeedNn ? ["nn", "xn", "n'"] : ["n", "nn", "xn"]);
+      out.push(nextNeedNn ? ["nn", "xn", "n'"] : ["n", "nn", "xn", "n'"]);
       i += 1;
       continue;
     }
@@ -538,10 +637,6 @@ export function currentGuide(engine: TypingEngine, count = 8): string {
     .join("");
 }
 
-function currentSpelling(unit: TypeUnit, buffer: string): string {
-  return matchingSpellings(unit.spellings, buffer)[0] ?? unit.preferred;
-}
-
 export function romajiGuideChars(engine: TypingEngine): GuideChar[] {
   const out: GuideChar[] = [];
   for (let i = 0; i < engine.units.length; i += 1) {
@@ -550,7 +645,7 @@ export function romajiGuideChars(engine: TypingEngine): GuideChar[] {
       out.push({ ch: " ", mark: i < engine.moraIndex ? "typed" : "pending" });
       continue;
     }
-    const spelling = i === engine.moraIndex ? currentSpelling(unit, engine.buffer) : unit.preferred;
+    const spelling = unit.preferred;
     for (let j = 0; j < spelling.length; j += 1) {
       let mark: DisplayMark = "pending";
       if (i < engine.moraIndex) mark = "typed";

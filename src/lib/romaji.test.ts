@@ -168,6 +168,126 @@ describe("romaji", () => {
     expect(marksFor(engine).every((mark) => mark === "typed")).toBe(true);
   });
 
+  it("accepts ji and zi for じ", () => {
+    const a = createEngine([{ text: "じ", kana: "じ" }]);
+    typeAll(a, "ji");
+    expect(isComplete(a)).toBe(true);
+    const b = createEngine([{ text: "じ", kana: "じ" }]);
+    typeAll(b, "zi");
+    expect(isComplete(b)).toBe(true);
+  });
+
+  it("accepts sha/sya, ja/jya/zya, and cha/tya/cya", () => {
+    for (const keys of ["sha", "sya"]) {
+      const engine = createEngine([{ text: "しゃ", kana: "しゃ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+    for (const keys of ["ja", "jya", "zya"]) {
+      const engine = createEngine([{ text: "じゃ", kana: "じゃ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+    for (const keys of ["cha", "tya", "cya"]) {
+      const engine = createEngine([{ text: "ちゃ", kana: "ちゃ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+  });
+
+  it("accepts x/l spellings for small kana", () => {
+    for (const keys of ["xya", "lya"]) {
+      const engine = createEngine([{ text: "ゃ", kana: "ゃ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+    for (const keys of ["xa", "la"]) {
+      const engine = createEngine([{ text: "ぁ", kana: "ぁ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+  });
+
+  it("types まって as matte and っ as xtu/ltu", () => {
+    const matte = createEngine([{ text: "まって", kana: "まって" }]);
+    typeAll(matte, "matte");
+    expect(isComplete(matte)).toBe(true);
+
+    const xtu = createEngine([{ text: "まって", kana: "まって" }]);
+    typeAll(xtu, "maxtute");
+    expect(isComplete(xtu)).toBe(true);
+
+    const ltu = createEngine([{ text: "きって", kana: "きって" }]);
+    typeAll(ltu, "kiltute");
+    expect(isComplete(ltu)).toBe(true);
+  });
+
+  it("accepts n/nn/n' for ん without swallowing the next vowel", () => {
+    const safe = createEngine([{ text: "かん", kana: "かん" }]);
+    typeAll(safe, "kan");
+    expect(isComplete(safe)).toBe(true);
+
+    const nn = createEngine([{ text: "かんあ", kana: "かんあ" }]);
+    typeAll(nn, "kanna");
+    expect(isComplete(nn)).toBe(true);
+
+    const apostrophe = createEngine([{ text: "かんあ", kana: "かんあ" }]);
+    typeAll(apostrophe, "kan'a");
+    expect(isComplete(apostrophe)).toBe(true);
+
+    const swallowed = createEngine([{ text: "かんあ", kana: "かんあ" }]);
+    typeAll(swallowed, "kana");
+    expect(isComplete(swallowed)).toBe(false);
+  });
+
+  it("accepts common foreign-sound IME spellings", () => {
+    for (const keys of ["thi", "texi", "teli"]) {
+      const engine = createEngine([{ text: "てぃ", kana: "てぃ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+    for (const keys of ["dhi", "dexi", "deli"]) {
+      const engine = createEngine([{ text: "でぃ", kana: "でぃ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+    for (const keys of ["fa", "fuxa", "fula"]) {
+      const engine = createEngine([{ text: "ふぁ", kana: "ふぁ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+    for (const keys of ["wi", "uxi", "uli"]) {
+      const engine = createEngine([{ text: "うぃ", kana: "うぃ" }]);
+      typeAll(engine, keys);
+      expect(isComplete(engine), keys).toBe(true);
+    }
+  });
+
+  it("keeps the representative guide while accepting another spelling", () => {
+    const engine = createEngine([{ text: "し", kana: "し" }]);
+    expect(
+      romajiGuideChars(engine)
+        .map((item) => item.ch)
+        .join(""),
+    ).toBe("shi");
+    expect(handleKey(engine, "s")).toBe("hit");
+    expect(
+      romajiGuideChars(engine)
+        .map((item) => item.ch)
+        .join(""),
+    ).toBe("shi");
+    expect(handleKey(engine, "i")).toBe("complete");
+    expect(isComplete(engine)).toBe(true);
+  });
+
+  it("treats a valid prefix as a hit and an unknown prefix as a miss", () => {
+    const engine = createEngine([{ text: "ちゃ", kana: "ちゃ" }]);
+    expect(handleKey(engine, "t")).toBe("hit");
+    expect(handleKey(engine, "y")).toBe("hit");
+    expect(handleKey(engine, "x")).toBe("miss");
+    expect(handleKey(engine, "a")).toBe("complete");
+  });
+
   it("keeps romaji guide progress in sync with the engine", () => {
     const engine = createEngine([
       { text: "確", kana: "かく" },
